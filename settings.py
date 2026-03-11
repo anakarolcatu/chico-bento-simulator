@@ -1,0 +1,15 @@
+# CONFIGURAÇÕES INICIAIS
+SCREEN_WIDTH = 1152
+SCREEN_HEIGHT = 672
+FPS = 60
+TITLE = "Chico Bento Simulator"
+MENU_BG = "assets/ui/main_menu_bg.png"
+
+# CORES
+WHITE = (255, 255, 255)
+BLACK = (20, 20, 20)
+GREEN = (80, 170, 90)
+DARK_GREEN = (40,110, 60)
+BROWN = (120, 80, 50)
+YELLOW = (230, 210, 120)
+GRAY = (160, 160, 160)
