@@ -36,12 +36,18 @@ class MenuState(BaseState):
         self.panel = nine_slice(panel_base, 260, 360, 4)
         self.panel_rect = self.panel.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
 
+        self.panel_shadow = self.panel.copy()
+        self.panel_shadow.fill((0, 0, 0, 90), special_flags=pygame.BLEND_RGBA_MULT)
+        self.shadow_offset = (6, 6)
+
         # Fundo do título
         title_plate_base = get_sprite(self.menu_sheet, 207, 196, 49, 40)
         self.title_plate = nine_slice(title_plate_base, 420, 110, 4)
         self.title_plate_rect = self.title_plate.get_rect(
             center=(self.panel_rect.centerx, self.panel_rect.y - 0)
-)
+        )
+        self.title_plate_shadow = self.title_plate.copy()
+        self.title_plate_shadow.fill((0, 0, 0, 90), special_flags=pygame.BLEND_RGBA_MULT)
 
         # Botões do menu
         self.button_sheet = pygame.image.load("assets/ui/Buttons.png").convert_alpha()
@@ -94,7 +100,8 @@ class MenuState(BaseState):
     def activate_selected(self):
         option = self.selected
         if option == 0:
-            print("Iniciar novo jogo")
+            from src.states.play_state import PlayState
+            self.game.change_state(PlayState(self.game))
         elif option == 1:
             print("Carregar jogo")
         elif option == 2:
@@ -112,7 +119,17 @@ class MenuState(BaseState):
 
     def draw(self, screen):
         screen.blit(self.background, self.bg_rect)
+
+        screen.blit(
+            self.panel_shadow,
+            (self.panel_rect.x + self.shadow_offset[0], self.panel_rect.y + self.shadow_offset[1])
+        )
         screen.blit(self.panel, self.panel_rect)
+
+        screen.blit(
+            self.title_plate_shadow,
+            (self.title_plate_rect.x + 4, self.title_plate_rect.y + 4)
+        )
         screen.blit(self.title_plate, self.title_plate_rect)
 
         line_gap = 42
