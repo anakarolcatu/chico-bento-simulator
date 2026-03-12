@@ -4,6 +4,11 @@ SCREEN_HEIGHT = 672
 FPS = 60
 TITLE = "Chico Bento Simulator"
 MENU_BG = "assets/ui/main_menu_bg.png"
+FONT_PATH = "assets/fonts/pixel.ttf"
+
+FONT_SMALL = 12
+FONT_MEDIUM = 16
+FONT_LARGE = 24
 
 # CORES
 WHITE = (255, 255, 255)
