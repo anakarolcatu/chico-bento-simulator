@@ -53,10 +53,18 @@ class PlayState(BaseState):
 
                 if tile_pos is not None:
                     row, col = tile_pos
-                    self.garden.hoe_tile(row, col)
+                    tile = self.garden.tiles[row][col]
+
+                    if tile["state"] == "empty":
+                        self.garden.hoe_tile(row, col)
+                    elif tile["state"] == "hoed":
+                        self.garden.plant_tile(row, col)
+                    elif tile["state"] == "grown":
+                        self.garden.harvest_tile(row, col)
 
     def update(self, dt):
         self.player.update(dt, self.obstacles)
+        self.garden.update(dt)
 
     def draw(self, screen):
         screen.fill((111, 183, 88))

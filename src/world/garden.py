@@ -14,7 +14,8 @@ class Garden:
             row_tiles = []
             for col in range(cols):
                 row_tiles.append({
-                    "state": "empty"
+                    "state": "empty",
+                    "growth_timer": 0
                 })
             self.tiles.append(row_tiles)
 
@@ -42,18 +43,58 @@ class Garden:
         if self.tiles[row][col]["state"] == "empty":
             self.tiles[row][col]["state"] = "hoed"
 
+    def plant_tile(self, row, col):
+        tile = self.tiles[row][col]
+        if tile["state"] == "hoed":
+            tile["state"] = "planted"
+            tile["growth_timer"] = 0
+
+    def update(self, dt):
+        for row in range(self.rows):
+            for col in range(self.cols):
+                tile = self.tiles[row][col]
+
+                if tile["state"] == "planted":
+                    tile["growth_timer"] += dt
+
+                    if tile["growth_timer"] >= 5:
+                        tile["state"] = "grown"
+    
+    def harvest_tile(self, row, col):
+        tile = self.tiles[row][col]
+        if tile["state"] == "grown":
+            tile["state"] = "hoed"
+            tile["growth_timer"] = 0
+
+
     def draw(self, screen):
         for row in range(self.rows):
             for col in range(self.cols):
                 tile = self.tiles[row][col]
                 rect = self.get_tile_rect(row, col)
+                inner_rect = rect.inflate(-8, -8)
 
+                # cor da terra
                 if tile["state"] == "empty":
                     color = (110, 70, 40)
-                elif tile["state"] == "hoed":
+
+                elif tile["state"] in ("hoed", "planted", "grown"):
                     color = (85, 52, 28)
+
                 else:
                     color = (110, 70, 40)
 
-                inner_rect = rect.inflate(-8, -8)
+                # desenha o chão primeiro
                 pygame.draw.rect(screen, color, inner_rect, border_radius=4)
+
+                # desenha a planta por cima
+                if tile["state"] == "planted":
+                    cx = rect.centerx
+                    cy = rect.centery + 4
+                    pygame.draw.circle(screen, (40, 170, 40), (cx, cy), 6)
+
+                elif tile["state"] == "grown":
+                    cx = rect.centerx
+                    cy = rect.centery + 2
+                    pygame.draw.rect(screen, (30, 120, 30), (cx - 4, cy - 16, 8, 10), border_radius=2)
+                    pygame.draw.circle(screen, (40, 170, 40), (cx, cy), 10)
