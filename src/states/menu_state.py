@@ -3,7 +3,7 @@ from src.states.base_state import BaseState
 from src.ui.buttons import Button
 from src.utils.spritesheet import get_sprite
 from src.utils.ui_helper import nine_slice
-from settings import BLACK, BROWN, MENU_BG, SCREEN_WIDTH, SCREEN_HEIGHT
+from settings import BLACK, BROWN, DARK_GREEN, MENU_BG, SCREEN_WIDTH, SCREEN_HEIGHT
 from src.core.font_manager import FontManager
 
 class MenuState(BaseState):
@@ -12,7 +12,10 @@ class MenuState(BaseState):
 
         self.font = FontManager.get(13)
         self.title_font = FontManager.get(32)
-        self.title_text = "CHICO BENTO SIMULATOR"
+        self.title_lines = [
+            "CHICO BENTO",
+            "SIMULATOR"
+        ]
 
         # Imagem de fundo 
         img = pygame.image.load(MENU_BG).convert()
@@ -33,6 +36,13 @@ class MenuState(BaseState):
         self.panel = nine_slice(panel_base, 260, 360, 4)
         self.panel_rect = self.panel.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
 
+        # Fundo do título
+        title_plate_base = get_sprite(self.menu_sheet, 207, 196, 49, 40)
+        self.title_plate = nine_slice(title_plate_base, 420, 110, 4)
+        self.title_plate_rect = self.title_plate.get_rect(
+            center=(self.panel_rect.centerx, self.panel_rect.y - 0)
+)
+
         # Botões do menu
         self.button_sheet = pygame.image.load("assets/ui/Buttons.png").convert_alpha()
         normal_button = get_sprite(self.button_sheet, 104, 130, 32, 15)
@@ -44,7 +54,7 @@ class MenuState(BaseState):
         pressed_button = pygame.transform.scale(pressed_button, (210, 60))
 
         center_x = SCREEN_WIDTH // 2
-        start_y = 250
+        start_y = self.panel_rect.y + 105
         gap = 65
         self.options = ["NOVO JOGO", "CARREGAR JOGO", "CONTROLES", "SAIR"]
 
@@ -103,15 +113,25 @@ class MenuState(BaseState):
     def draw(self, screen):
         screen.blit(self.background, self.bg_rect)
         screen.blit(self.panel, self.panel_rect)
+        screen.blit(self.title_plate, self.title_plate_rect)
 
-        shadow_surface = self.title_font.render(self.title_text, False, BROWN)
-        shadow_rect = shadow_surface.get_rect(center=(self.panel_rect.centerx + 2, self.panel_rect.y + 12))
+        line_gap = 42
+        block_height = len(self.title_lines) * line_gap
+        start_y = self.title_plate_rect.centery - block_height // 2 + 22
 
-        title_surface = self.title_font.render(self.title_text, False, BLACK)
-        title_rect = title_surface.get_rect(center=(self.panel_rect.centerx, self.panel_rect.y + 10))
+        for i, line in enumerate(self.title_lines):
+            shadow_surface = self.title_font.render(line, False, BLACK)
+            shadow_rect = shadow_surface.get_rect(
+                center=(self.title_plate_rect.centerx + 2, start_y + i * line_gap + 1)
+            )
 
-        screen.blit(shadow_surface, shadow_rect)
-        screen.blit(title_surface, title_rect)
+            title_surface = self.title_font.render(line, False, DARK_GREEN)
+            title_rect = title_surface.get_rect(
+                center=(self.title_plate_rect.centerx, start_y + i * line_gap)
+            )
+
+            screen.blit(shadow_surface, shadow_rect)
+            screen.blit(title_surface, title_rect)
 
         for button in self.buttons:
             button.draw(screen)
