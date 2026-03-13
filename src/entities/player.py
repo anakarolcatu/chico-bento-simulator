@@ -8,6 +8,7 @@ class Player:
         self.y = y
 
         self.speed = 220
+        self.scale = 2
 
         self.frame_width = 64
         self.frame_height = 64
@@ -49,6 +50,8 @@ class Player:
                     self.frame_width,
                     self.frame_height
                 )
+                new_size = int(self.frame_width * self.scale)
+                frame = pygame.transform.scale(frame, (new_size, new_size))
 
                 animations[direction].append(frame)
 

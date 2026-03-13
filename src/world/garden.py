@@ -1,5 +1,5 @@
 import pygame
-
+from src.data.crops import CROPS
 
 class Garden:
     def __init__(self, x, y, cols, rows, tile_size):
@@ -15,7 +15,8 @@ class Garden:
             for col in range(cols):
                 row_tiles.append({
                     "state": "empty",
-                    "growth_timer": 0
+                    "growth_timer": 0, 
+                    "crop_type": None
                 })
             self.tiles.append(row_tiles)
 
@@ -43,11 +44,13 @@ class Garden:
         if self.tiles[row][col]["state"] == "empty":
             self.tiles[row][col]["state"] = "hoed"
 
-    def plant_tile(self, row, col):
+    def plant_tile(self, row, col, crop_type, growth_time):
         tile = self.tiles[row][col]
         if tile["state"] == "hoed":
             tile["state"] = "planted"
             tile["growth_timer"] = 0
+            tile["growth_time"] = growth_time
+            tile["crop_type"] = crop_type
 
     def update(self, dt):
         for row in range(self.rows):
@@ -57,14 +60,21 @@ class Garden:
                 if tile["state"] == "planted":
                     tile["growth_timer"] += dt
 
-                    if tile["growth_timer"] >= 5:
+                    if tile["growth_timer"] >= tile["growth_time"]:
                         tile["state"] = "grown"
     
     def harvest_tile(self, row, col):
         tile = self.tiles[row][col]
+
         if tile["state"] == "grown":
+            harvested_crop = tile["crop_type"]
+
             tile["state"] = "hoed"
             tile["growth_timer"] = 0
+            tile["growth_time"] = 0
+            tile["crop_type"] = None
+            return harvested_crop
+        return None
 
 
     def draw(self, screen):
@@ -74,7 +84,6 @@ class Garden:
                 rect = self.get_tile_rect(row, col)
                 inner_rect = rect.inflate(-8, -8)
 
-                # cor da terra
                 if tile["state"] == "empty":
                     color = (110, 70, 40)
 
@@ -84,17 +93,26 @@ class Garden:
                 else:
                     color = (110, 70, 40)
 
-                # desenha o chão primeiro
                 pygame.draw.rect(screen, color, inner_rect, border_radius=4)
 
-                # desenha a planta por cima
                 if tile["state"] == "planted":
                     cx = rect.centerx
                     cy = rect.centery + 4
-                    pygame.draw.circle(screen, (40, 170, 40), (cx, cy), 6)
+                    plant_color = (40, 170, 40)
+                    for seed_name, crop_data in CROPS.items():
+                        if crop_data["crop_name"] == tile["crop_type"]:
+                            plant_color = crop_data["color"]
+                            break
+                    pygame.draw.circle(screen, plant_color, (cx, cy), 6)
 
                 elif tile["state"] == "grown":
                     cx = rect.centerx
                     cy = rect.centery + 2
+                    plant_color = (40, 170, 40)
+                    for seed_name, crop_data in CROPS.items():
+                        if crop_data["crop_name"] == tile["crop_type"]:
+                            plant_color = crop_data["color"]
+                            break
+
                     pygame.draw.rect(screen, (30, 120, 30), (cx - 4, cy - 16, 8, 10), border_radius=2)
-                    pygame.draw.circle(screen, (40, 170, 40), (cx, cy), 10)
+                    pygame.draw.circle(screen, plant_color, (cx, cy), 10)
