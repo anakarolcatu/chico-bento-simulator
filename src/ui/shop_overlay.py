@@ -3,6 +3,7 @@ from src.utils.spritesheet import get_sprite
 from src.utils.ui_helper import nine_slice
 from src.data.crops import CROPS
 
+
 class ShopOverlay:
     def __init__(self, inventory, font, title_font=None):
         self.inventory = inventory
@@ -10,10 +11,11 @@ class ShopOverlay:
         self.title_font = title_font or font
 
         self.is_open = False
-        self.active_panel = "buy"  
+        self.active_panel = "buy"
         self.selected_buy_index = 0
         self.selected_sell_index = 0
 
+        # preços de compra das sementes
         self.buy_seed_prices = {
             seed_name: crop_data["sell_price"] // 2 + 1
             for seed_name, crop_data in CROPS.items()
@@ -22,98 +24,65 @@ class ShopOverlay:
         self.buy_items = list(CROPS.keys())
 
         sheet = pygame.image.load("assets/ui/Shop.png").convert_alpha()
+
+        # recortes base
         panel_base = get_sprite(sheet, 7, 0, 115, 149)
         self.slot_img = get_sprite(sheet, 356, 160, 23, 23)
         self.slot_img = pygame.transform.scale(self.slot_img, (54, 54))
 
-        # painéis base
+        self.coin_img = get_sprite(sheet, 483, 163, 11, 11)
+        self.coin_img = pygame.transform.scale(self.coin_img, (18, 18))
+
+        # painéis
         self.left_panel = nine_slice(panel_base, 320, 380, 4)
         self.right_panel = nine_slice(panel_base, 320, 380, 4)
 
         self.left_rect = self.left_panel.get_rect(center=(360, 260))
         self.right_rect = self.right_panel.get_rect(center=(820, 260))
 
-        self.item_spacing = 40
-        self.item_start_y = 120
+        # ícones de sementes e plantas
+        self.item_icons = self.load_item_icons()
 
-    def draw_item_grid(self, screen, panel_rect, items, selected_index, active, mode="buy"):
-        cols = 3
-        spacing_x = 32
-        spacing_y = 16
-        start_x = panel_rect.x + 38
-        start_y = panel_rect.y + 72
+        # HELPERS DE LAYOUT 
+        self.header_offset_y = 16
 
-        for i, item in enumerate(items):
-            row = i // cols
-            col = i % cols
+        self.grid_cols = 3
+        self.grid_start_x = 38
+        self.grid_start_y = 72
+        self.grid_spacing_x = 32
+        self.grid_spacing_y = 16
 
-            x = start_x + col * (48 + spacing_x)
-            y = start_y + row * (48 + spacing_y + 22)
+        self.slot_price_offset_y = 10
+        self.slot_stack_padding_x = 3
+        self.slot_stack_padding_y = 1
 
-            slot_rect = self.slot_img.get_rect(topleft=(x, y))
-            screen.blit(self.slot_img, slot_rect)
+        self.footer_info_offset_y = 38
 
-            if active and i == selected_index:
-                pygame.draw.rect(screen, (255, 230, 120), slot_rect, 3, border_radius=4)
+        self.money_offset_x = 24
+        self.money_offset_y = 54
+        self.money_gap = 6
 
-            if mode == "buy":
-                color = CROPS[item]["color"]
-                pygame.draw.circle(screen, color, slot_rect.center, 8)
-                price = self.buy_seed_prices[item]
-                price_text = self.font.render(f"${price}", False, (20, 20, 20))
-                price_rect = price_text.get_rect(center=(slot_rect.centerx, slot_rect.bottom + 10))
-                screen.blit(price_text, price_rect)
+        self.help_text_y = 460
 
-
-            elif mode == "sell":
-                color = (40, 170, 40)
-                pygame.draw.circle(screen, color, slot_rect.center, 10)
-
-                amount = self.inventory.get_amount(item)
-                amount_text = self.font.render(str(amount), False, (20, 20, 20))
-                text_rect = amount_text.get_rect(bottomright=(slot_rect.right - 3, slot_rect.bottom - 1))
-                screen.blit(amount_text, text_rect)
-                sell_price = 0
-                for seed_name, crop_data in CROPS.items():
-                    if crop_data["crop_name"] == item:
-                        sell_price = crop_data["sell_price"]
-                        break
-
-                price_text = self.font.render(f"${sell_price}", False, (20, 20, 20))
-                price_rect = price_text.get_rect(center=(slot_rect.centerx, slot_rect.bottom + 10))
-                screen.blit(price_text, price_rect)
-
-    def draw_selected_item_info(self, screen, panel_rect, item_name, mode="buy"):
-        info_y = panel_rect.bottom - 55
-
-        if mode == "buy":
-            crop_data = CROPS[item_name]
-            item_label = crop_data["crop_name"].replace("_", " ").title()
-            price = self.buy_seed_prices[item_name]
-            text = f"{item_label}"
-
-        else:
-            crop_name = item_name.replace("_", " ").title()
-            amount = self.inventory.get_amount(item_name)
-
-            sell_price = 0
-            for seed_name, crop_data in CROPS.items():
-                if crop_data["crop_name"] == item_name:
-                    sell_price = crop_data["sell_price"]
-                    break
-
-            text = f"{crop_name} x{amount} - ${sell_price}"
-
-        info_surface = self.font.render(text, False, (20, 20, 20))
-        info_rect = info_surface.get_rect(center=(panel_rect.centerx, info_y))
-        screen.blit(info_surface, info_rect)
-
+    # Helpers de dados
     def open(self):
         self.is_open = True
         self.active_panel = "buy"
 
     def close(self):
         self.is_open = False
+
+    def get_crop_color_from_crop_name(self, crop_name):
+        for seed_name, crop_data in CROPS.items():
+            if crop_data["crop_name"] == crop_name:
+                return crop_data["color"]
+        return (40, 170, 40)
+
+    def get_sell_price(self, crop_name):
+        for seed_name, crop_data in CROPS.items():
+            if crop_data["crop_name"] == crop_name:
+                return crop_data["sell_price"]
+        return 0
 
     def get_sell_items(self):
         sell_items = []
@@ -134,25 +103,67 @@ class ShopOverlay:
                 unique_items.append(item)
 
         return unique_items
+    
+    def load_item_icons(self):
+        icons = {}
+        loaded_sheets = {}
 
-    def get_buy_label(self, seed_name):
-        crop_data = CROPS[seed_name]
-        crop_name = crop_data["crop_name"].replace("_", " ").title()
-        price = self.buy_seed_prices[seed_name]
-        return f"{crop_name} - ${price}"
+        def get_sheet(path):
+            if path not in loaded_sheets:
+                loaded_sheets[path] = pygame.image.load(path).convert_alpha()
+            return loaded_sheets[path]
 
-    def get_sell_label(self, crop_name):
-        crop_display = crop_name.replace("_", " ").title()
-
-        sell_price = 0
         for seed_name, crop_data in CROPS.items():
-            if crop_data["crop_name"] == crop_name:
-                sell_price = crop_data["sell_price"]
-                break
+            # ícone da semente
+            if "seed_sheet" in crop_data and "seed_icon" in crop_data:
+                seed_sheet = get_sheet(crop_data["seed_sheet"])
+                x, y, w, h = crop_data["seed_icon"]
 
-        amount = self.inventory.get_amount(crop_name)
+                icon = get_sprite(seed_sheet, x, y, w, h)
+                icon = pygame.transform.scale(icon, (26, 26))
+                icons[seed_name] = icon
 
-        return f"{crop_display} x{amount} - ${sell_price}"
+            # ícone da colheita
+            if "crop_sheet" in crop_data and "crop_icon" in crop_data:
+                crop_sheet = get_sheet(crop_data["crop_sheet"])
+                x, y, w, h = crop_data["crop_icon"]
+
+                icon = get_sprite(crop_sheet, x, y, w, h)
+                icon = pygame.transform.scale(icon, (26, 26))
+                icons[crop_data["crop_name"]] = icon
+
+        return icons
+
+    # Navegação / lógica
+    def move_grid_selection(self, current_index, key, total_items):
+        cols = self.grid_cols
+
+        if total_items == 0:
+            return 0
+
+        row = current_index // cols
+        col = current_index % cols
+
+        max_row = (total_items - 1) // cols
+
+        if key == pygame.K_LEFT:
+            if col > 0:
+                current_index -= 1
+
+        elif key == pygame.K_RIGHT:
+            if col < cols - 1 and current_index + 1 < total_items:
+                current_index += 1
+
+        elif key == pygame.K_UP:
+            if row > 0:
+                current_index -= cols
+
+        elif key == pygame.K_DOWN:
+            if row < max_row and current_index + cols < total_items:
+                current_index += cols
+
+        return current_index
+
 
     def handle_event(self, event, money):
         if event.type != pygame.KEYDOWN:
@@ -170,12 +181,12 @@ class ShopOverlay:
             return money
 
         if self.active_panel == "buy":
-            if event.key == pygame.K_UP:
-                self.selected_buy_index = (self.selected_buy_index - 1) % len(self.buy_items)
-
-            elif event.key == pygame.K_DOWN:
-                self.selected_buy_index = (self.selected_buy_index + 1) % len(self.buy_items)
-
+            if event.key in (pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN):
+                self.selected_buy_index = self.move_grid_selection(
+                    self.selected_buy_index,
+                    event.key,
+                    len(self.buy_items)
+                )
             elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
                 seed_name = self.buy_items[self.selected_buy_index]
                 price = self.buy_seed_prices[seed_name]
@@ -189,20 +200,15 @@ class ShopOverlay:
             sell_items = self.get_sell_items()
 
             if sell_items:
-                if event.key == pygame.K_UP:
-                    self.selected_sell_index = (self.selected_sell_index - 1) % len(sell_items)
-
-                elif event.key == pygame.K_DOWN:
-                    self.selected_sell_index = (self.selected_sell_index + 1) % len(sell_items)
-
+                if event.key in (pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN):
+                    self.selected_sell_index = self.move_grid_selection(
+                        self.selected_sell_index,
+                        event.key,
+                        len(sell_items)
+                    )   
                 elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
                     crop_name = sell_items[self.selected_sell_index]
-
-                    sell_price = 0
-                    for seed_name, crop_data in CROPS.items():
-                        if crop_data["crop_name"] == crop_name:
-                            sell_price = crop_data["sell_price"]
-                            break
+                    sell_price = self.get_sell_price(crop_name)
 
                     amount = self.inventory.remove_all(crop_name)
                     if amount > 0:
@@ -210,12 +216,157 @@ class ShopOverlay:
 
                     sell_items = self.get_sell_items()
                     if sell_items:
-                        self.selected_sell_index %= len(sell_items)
+                        self.selected_sell_index = min(self.selected_sell_index, len(sell_items) - 1)
                     else:
                         self.selected_sell_index = 0
-
         return money
 
+    # Desenho
+    def draw_item_grid(self, screen, panel_rect, items, selected_index, active, mode="buy"):
+        for i, item in enumerate(items):
+            row = i // self.grid_cols
+            col = i % self.grid_cols
+
+            x = panel_rect.x + self.grid_start_x + col * (48 + self.grid_spacing_x)
+            y = panel_rect.y + self.grid_start_y + row * (48 + self.grid_spacing_y + 22)
+
+            slot_rect = self.slot_img.get_rect(topleft=(x, y))
+            screen.blit(self.slot_img, slot_rect)
+
+            if active and i == selected_index:
+                pygame.draw.rect(screen, (255, 230, 120), slot_rect, 3, border_radius=4)
+
+            if mode == "buy":
+                if mode == "buy":
+                    drawn = self.draw_item_icon(screen, item, slot_rect)
+
+                    if not drawn:
+                        color = CROPS[item]["color"]
+                        pygame.draw.circle(screen, color, slot_rect.center, 8)
+
+                    price = self.buy_seed_prices[item]
+                    price_surface = self.font.render(str(price), False, (20, 20, 20))
+
+                    text_rect = price_surface.get_rect(
+                        center=(slot_rect.centerx - 6, slot_rect.bottom + self.slot_price_offset_y)
+                    )
+                    coin_rect = self.coin_img.get_rect(
+                        midleft=(text_rect.right + 2, text_rect.centery)
+                    )
+
+                    screen.blit(price_surface, text_rect)
+                    screen.blit(self.coin_img, coin_rect)
+
+            elif mode == "sell":
+                drawn = self.draw_item_icon(screen, item, slot_rect)
+
+                if not drawn:
+                    color = self.get_crop_color_from_crop_name(item)
+                    pygame.draw.circle(screen, color, slot_rect.center, 10)
+
+                amount = self.inventory.get_amount(item)
+                amount_text = self.font.render(str(amount), False, (20, 20, 20))
+                amount_rect = amount_text.get_rect(
+                    bottomright=(
+                        slot_rect.right - self.slot_stack_padding_x,
+                        slot_rect.bottom - self.slot_stack_padding_y
+                    )
+                )
+                screen.blit(amount_text, amount_rect)
+
+                sell_price = self.get_sell_price(item)
+                price_surface = self.font.render(str(sell_price), False, (20, 20, 20))
+
+                text_rect = price_surface.get_rect(
+                    center=(slot_rect.centerx - 6, slot_rect.bottom + self.slot_price_offset_y)
+                )
+                coin_rect = self.coin_img.get_rect(
+                    midleft=(text_rect.right + 2, text_rect.centery)
+                )
+
+                screen.blit(price_surface, text_rect)
+                screen.blit(self.coin_img, coin_rect)
+
+    def draw_item_icon(self, screen, item_name, slot_rect):
+        icon = self.item_icons.get(item_name)
+
+        if icon is None:
+            return False
+
+        icon_rect = icon.get_rect(center=slot_rect.center)
+        screen.blit(icon, icon_rect)
+        return True
+
+    def draw_selected_item_info(self, screen, panel_rect, item_name, mode="buy"):
+        info_y = panel_rect.bottom - self.footer_info_offset_y
+
+        if mode == "buy":
+            crop_data = CROPS[item_name]
+            text = crop_data["crop_name"].replace("_", " ").title()
+
+        else:
+            crop_name = item_name.replace("_", " ").title()
+            amount = self.inventory.get_amount(item_name)
+            text = f"{crop_name} x{amount}"
+
+        info_surface = self.font.render(text, False, (20, 20, 20))
+        info_rect = info_surface.get_rect(center=(panel_rect.centerx, info_y))
+        screen.blit(info_surface, info_rect)
+
+    def draw_buy_list(self, screen):
+        self.draw_item_grid(
+            screen,
+            self.left_rect,
+            self.buy_items,
+            self.selected_buy_index,
+            self.active_panel == "buy",
+            mode="buy"
+        )
+
+        if self.buy_items:
+            selected_item = self.buy_items[self.selected_buy_index]
+            self.draw_selected_item_info(screen, self.left_rect, selected_item, mode="buy")
+
+    def draw_sell_list(self, screen):
+        sell_items = self.get_sell_items()
+
+        if not sell_items:
+            empty_text = self.font.render("Nada para vender", False, (20, 20, 20))
+            screen.blit(
+                empty_text,
+                empty_text.get_rect(center=(self.right_rect.centerx, self.right_rect.centery))
+            )
+            return
+
+        self.draw_item_grid(
+            screen,
+            self.right_rect,
+            sell_items,
+            self.selected_sell_index,
+            self.active_panel == "sell",
+            mode="sell"
+        )
+
+        selected_item = sell_items[self.selected_sell_index]
+        self.draw_selected_item_info(screen, self.right_rect, selected_item, mode="sell")
+
+    def draw_money_info(self, screen, money):
+        money_surface = self.font.render(str(money), False, (20, 20, 20))
+
+        coin_rect = self.coin_img.get_rect(
+            midleft=(
+                self.left_rect.x + self.money_offset_x,
+                self.left_rect.y + self.money_offset_y
+            )
+        )
+
+        money_rect = money_surface.get_rect(
+            midleft=(coin_rect.right + self.money_gap, coin_rect.centery)
+        )
+
+        screen.blit(self.coin_img, coin_rect)
+        screen.blit(money_surface, money_rect)
+    
     def draw(self, screen, money):
         if not self.is_open:
             return
@@ -230,48 +381,19 @@ class ShopOverlay:
         buy_title = self.title_font.render("COMPRAR", False, (20, 20, 20))
         sell_title = self.title_font.render("VENDER", False, (20, 20, 20))
 
-        screen.blit(buy_title, buy_title.get_rect(center=(self.left_rect.centerx, self.left_rect.y + 16)))
-        screen.blit(sell_title, sell_title.get_rect(center=(self.right_rect.centerx, self.right_rect.y + 16)))
+        screen.blit(
+            buy_title,
+            buy_title.get_rect(center=(self.left_rect.centerx, self.left_rect.y + self.header_offset_y))
+        )
+        screen.blit(
+            sell_title,
+            sell_title.get_rect(center=(self.right_rect.centerx, self.right_rect.y + self.header_offset_y))
+        )
 
-        money_text = self.font.render(f"Dinheiro: ${money}", False, (20, 20, 20))
-        screen.blit(money_text, money_text.get_rect(center=(screen.get_width() // 2, 430)))
+        self.draw_money_info(screen, money)
 
         help_text = self.font.render("TAB alterna | ENTER confirma | ESC fecha", False, (20, 20, 20))
-        screen.blit(help_text, help_text.get_rect(center=(screen.get_width() // 2, 460)))
+        screen.blit(help_text, help_text.get_rect(center=(screen.get_width() // 2, self.help_text_y)))
 
         self.draw_buy_list(screen)
         self.draw_sell_list(screen)
-
-    def draw_buy_list(self, screen):
-        self.draw_item_grid(
-        screen,
-        self.left_rect,
-        self.buy_items,
-        self.selected_buy_index,
-        self.active_panel == "buy",
-        mode="buy"
-        )
-
-        if self.buy_items:
-            selected_item = self.buy_items[self.selected_buy_index]
-            self.draw_selected_item_info(screen, self.left_rect, selected_item, mode="buy")
-
-    def draw_sell_list(self, screen):
-        sell_items = self.get_sell_items()
-
-        if not sell_items:
-            empty_text = self.font.render("Nada para vender", False, (20, 20, 20))
-            screen.blit(empty_text, empty_text.get_rect(center=(self.right_rect.centerx, self.right_rect.centery)))
-            return
-
-        self.draw_item_grid(
-            screen,
-            self.right_rect,
-            sell_items,
-            self.selected_sell_index,
-            self.active_panel == "sell",
-            mode="sell"
-        )
-
-        selected_item = sell_items[self.selected_sell_index]
-        self.draw_selected_item_info(screen, self.right_rect, selected_item, mode="sell")

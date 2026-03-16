@@ -2,12 +2,11 @@ import os
 import sys
 import pygame
 
-# Permite importar módulos do projeto
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 pygame.init()
 
-IMAGE_PATH = "assets/ui/Shop.png"
+IMAGE_PATH = "assets/tilesets/Plants.png"
 WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 800
 BG_COLOR = (30, 30, 30)
@@ -25,14 +24,17 @@ font = pygame.font.SysFont("arial", 20)
 
 sheet = pygame.image.load(IMAGE_PATH).convert_alpha()
 
-zoom = 2
+zoom = 1
 grid_size = 16
 offset_x = 20
 offset_y = 20
 
 dragging = False
+panning = False
 start_pos = None
 end_pos = None
+pan_start_mouse = None
+pan_start_offset = None
 
 
 def draw_grid(surface, img_rect, cell_size, color):
@@ -95,6 +97,18 @@ def save_selection_preview(x, y, w, h):
 running = True
 while running:
     mouse_pos = pygame.mouse.get_pos()
+    keys = pygame.key.get_pressed()
+
+    # mover com teclado
+    pan_speed = 10
+    if keys[pygame.K_LEFT]:
+        offset_x += pan_speed
+    if keys[pygame.K_RIGHT]:
+        offset_x -= pan_speed
+    if keys[pygame.K_UP]:
+        offset_y += pan_speed
+    if keys[pygame.K_DOWN]:
+        offset_y -= pan_speed
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -122,12 +136,25 @@ while running:
                 print(f"Preview salvo: x={x}, y={y}, w={w}, h={h}")
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
+            # botão esquerdo: seleção
             if event.button == 1:
                 img_x, img_y = screen_to_image(event.pos)
                 img_x, img_y = clamp_to_image(img_x, img_y)
                 start_pos = (img_x, img_y)
                 end_pos = (img_x, img_y)
                 dragging = True
+
+            # botão direito: pan
+            elif event.button == 3:
+                panning = True
+                pan_start_mouse = event.pos
+                pan_start_offset = (offset_x, offset_y)
+
+            # scroll mouse: zoom
+            elif event.button == 4:
+                zoom = min(zoom + 1, 16)
+            elif event.button == 5:
+                zoom = max(1, zoom - 1)
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1 and dragging:
@@ -139,11 +166,20 @@ while running:
                 x, y, w, h = normalize_rect(start_pos, end_pos)
                 print(f"x={x}, y={y}, w={w}, h={h}")
 
+            elif event.button == 3:
+                panning = False
+
         elif event.type == pygame.MOUSEMOTION:
             if dragging:
                 img_x, img_y = screen_to_image(event.pos)
                 img_x, img_y = clamp_to_image(img_x, img_y)
                 end_pos = (img_x, img_y)
+
+            elif panning:
+                dx = event.pos[0] - pan_start_mouse[0]
+                dy = event.pos[1] - pan_start_mouse[1]
+                offset_x = pan_start_offset[0] + dx
+                offset_y = pan_start_offset[1] + dy
 
     scaled_sheet = pygame.transform.scale(
         sheet,
@@ -175,8 +211,10 @@ while running:
         f"mouse img: x={img_mouse_x}, y={img_mouse_y}",
         f"zoom: {zoom}x",
         f"grid: {grid_size}px",
-        "arraste com botão esquerdo para selecionar",
-        "teclas: +/- zoom | [ ] grid | S salva preview | ESC sai",
+        f"offset: x={offset_x}, y={offset_y}",
+        "botão esquerdo: selecionar",
+        "botão direito: mover imagem",
+        "scroll ou +/-: zoom | [ ] grid | S salva preview | ESC sai",
     ]
 
     if start_pos and end_pos:
@@ -194,7 +232,7 @@ while running:
         )
         pygame.draw.rect(screen, SELECTION_COLOR, sel_rect, 2)
 
-    draw_text_block(info_lines, 20, WINDOW_HEIGHT - 180)
+    draw_text_block(info_lines, 20, WINDOW_HEIGHT - 210)
 
     pygame.display.flip()
     clock.tick(60)

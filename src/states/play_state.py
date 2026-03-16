@@ -9,6 +9,8 @@ from src.utils.spritesheet import get_sprite
 from src.data.crops import CROPS
 from src.ui.shop_overlay import ShopOverlay
 from src.core.font_manager import FontManager
+from src.world.tiled_map import TiledMap
+from src.world.camera import Camera
 
 class PlayState(BaseState):
     def __init__(self, game):
@@ -18,6 +20,7 @@ class PlayState(BaseState):
 
         self.house_rect = pygame.Rect(120, 80, 230, 180)
         self.shop_rect = pygame.Rect(800, 90, 200, 160)
+        self.map = TiledMap("assets/maps/GameKit.tmx")
 
         self.garden = Garden(
             x=360,
@@ -27,12 +30,18 @@ class PlayState(BaseState):
             tile_size=60
         )
         self.font = FontManager.get(14)
+        self.font_small = FontManager.get(12)
         self.shop_title_font = FontManager.get(18)
 
-        self.obstacles = [
-            self.house_rect,
-            self.shop_rect
-        ]
+        self.obstacles = self.map.collision_rects
+
+        # Camera
+        self.camera = Camera(
+            SCREEN_WIDTH,
+            SCREEN_HEIGHT,
+            self.map.width,
+            self.map.height
+        )
 
         # Inventário
         self.inventory = Inventory(size=10)
@@ -41,8 +50,9 @@ class PlayState(BaseState):
         self.money = 20
         self.seed_price = 3
         self.inventory.add_item("seed_cebola", 5)
-        self.inventory.add_item("seed_cenoura", 3)
+        self.inventory.add_item("seed_brocolis", 3)
         self.inventory.add_item("seed_trigo", 2)
+        self.item_icons = self.load_item_icons()
         
         # fundo do inventário
         sheet = pygame.image.load("assets/ui/Action_panel.png").convert_alpha()
@@ -128,47 +138,71 @@ class PlayState(BaseState):
 
             if harvested_crop is not None:
                 self.inventory.add_item(harvested_crop, 1)
+
+    def load_item_icons(self):
+        icons = {}
+        loaded_sheets = {}
+
+        def get_sheet(path):
+            if path not in loaded_sheets:
+                loaded_sheets[path] = pygame.image.load(path).convert_alpha()
+            return loaded_sheets[path]
+
+        for seed_name, crop_data in CROPS.items():
+            # ícone da semente
+            if "seed_sheet" in crop_data and "seed_icon" in crop_data:
+                seed_sheet = get_sheet(crop_data["seed_sheet"])
+                x, y, w, h = crop_data["seed_icon"]
+
+                icon = get_sprite(seed_sheet, x, y, w, h)
+                icon = pygame.transform.scale(icon, (24, 24))
+                icons[seed_name] = icon
+
+            # ícone da colheita
+            if "crop_sheet" in crop_data and "crop_icon" in crop_data:
+                crop_sheet = get_sheet(crop_data["crop_sheet"])
+                x, y, w, h = crop_data["crop_icon"]
+
+                icon = get_sprite(crop_sheet, x, y, w, h)
+                icon = pygame.transform.scale(icon, (24, 24))
+                icons[crop_data["crop_name"]] = icon
+
+        return icons
+
+
+    def draw_inventory_item_icon(self, screen, item_name, slot_rect):
+        icon = self.item_icons.get(item_name)
+
+        if icon is None:
+            return False
+
+        icon_rect = icon.get_rect(center=slot_rect.center)
+        screen.blit(icon, icon_rect)
+        return True
     
     def update(self, dt):
         if not self.shop_overlay.is_open:
             self.player.update(dt, self.obstacles)
             self.garden.update(dt)
+            self.camera.update(self.player.rect)
 
     def draw(self, screen):
-        screen.fill((111, 183, 88))
-
-        # casa
-        pygame.draw.rect(screen, (160, 160, 170), self.house_rect, border_radius=8)
-        house_text = self.font.render("Casa", True, (20, 20, 20))
-        screen.blit(house_text, house_text.get_rect(center=self.house_rect.center))
-
-        # vendinha
-        pygame.draw.rect(screen, (220, 190, 110), self.shop_rect, border_radius=8)
-        shop_text = self.font.render("Vendinha", True, (20, 20, 20))
-        screen.blit(shop_text, shop_text.get_rect(center=self.shop_rect.center))
-
-        # plantio
-        garden_area = pygame.Rect(
-            self.garden.x,
-            self.garden.y,
-            self.garden.cols * self.garden.tile_size,
-            self.garden.rows * self.garden.tile_size
-        )
-        pygame.draw.rect(screen, (135, 92, 56), garden_area, border_radius=8)
-
-        self.garden.draw(screen)
+        self.map.draw(screen)
         self.player.draw(screen)
+        self.map.draw(screen, self.camera)
 
         hint = self.font.render("E: interagir | 1-0: selecionar slot | ESC: menu", True, (20, 20, 20))
         screen.blit(hint, (20, 20))
         # inventário
         screen.blit(self.action_panel, self.action_panel_rect)
+
         for i in range(self.slot_count):
             slot = self.inventory.get_slot(i)
             slot_x = self.slot_start_x + i * self.slot_spacing
             slot_y = self.slot_start_y
 
             slot_rect = pygame.Rect(slot_x, slot_y, self.slot_width, self.slot_height)
+
             # debug para ver alinhamento
             # pygame.draw.rect(screen, (255, 0, 0), slot_rect, 1)
 
@@ -177,25 +211,29 @@ class PlayState(BaseState):
 
             if slot is not None:
                 item_name = slot["item"]
-                if item_name in CROPS:
-                    color = CROPS[item_name]["color"]
-                    pygame.draw.circle(screen, color, slot_rect.center, 8)
 
-                else:
-                    # produtos colhidos
-                    crop_colors = {
-                        "cebola": (40, 170, 40),
-                        "cenoura": (255, 140, 60),
-                        "milho": (240, 210, 70)
-                    }
+                drawn = self.draw_inventory_item_icon(screen, item_name, slot_rect)
 
-                    if item_name in crop_colors:
-                        pygame.draw.circle(screen, crop_colors[item_name], slot_rect.center, 10)
+                if not drawn:
+                    if item_name in CROPS:
+                        color = CROPS[item_name]["color"]
+                        pygame.draw.circle(screen, color, slot_rect.center, 8)
+                    else:
+                        pygame.draw.circle(screen, (40, 170, 40), slot_rect.center, 10)
 
-                amount_text = self.font.render(str(slot["amount"]), False, (20, 20, 20))
-                text_rect = amount_text.get_rect(bottomright=(slot_rect.right - 4, slot_rect.bottom - 2))
-                screen.blit(amount_text, text_rect)
+                if slot["amount"] > 1:
+                    amount_surface = self.font_small.render(str(slot["amount"]), False, (20, 20, 20))
+                    amount_rect = amount_surface.get_rect(
+                        bottomright=(slot_rect.right - 4, slot_rect.bottom - 3)
+                    )
+                    shadow_surface = self.font_small.render(str(slot["amount"]), False, (255, 255, 255))
+                    shadow_rect = shadow_surface.get_rect(
+                        bottomright=(slot_rect.right - 3, slot_rect.bottom - 2)
+                    )
+                    screen.blit(shadow_surface, shadow_rect)
+                    screen.blit(amount_surface, amount_rect)
 
         money_text = self.font.render(f"Dinheiro: ${self.money}", True, (20, 20, 20))
         screen.blit(money_text, (20, 50))
+
         self.shop_overlay.draw(screen, self.money)
