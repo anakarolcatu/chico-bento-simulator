@@ -16,18 +16,58 @@ class PlayState(BaseState):
     def __init__(self, game):
         super().__init__(game)
 
-        self.player = Player(500, 420)
+        self.map = TiledMap("assets/maps/GameKit.tmx", scale=3)
+        spawn_x, spawn_y = self.map.player_spawn
+        self.player = Player(spawn_x, spawn_y)
 
-        self.house_rect = pygame.Rect(120, 80, 230, 180)
-        self.shop_rect = pygame.Rect(800, 90, 200, 160)
-        self.map = TiledMap("assets/maps/GameKit.tmx")
+        # Grupo de layers para renderização
+        self.background_layers = {
+            "Ground",
+            "Spots",
+            "Plantio",
+            "Road",
+            "Grass",
+            "Plates",
+            "Grass_detail6",
+            "Grass_details3",
+            "Grass_details4",
+            "Grass_details5",
+        }
+
+        self.depth_layers = {
+            "Objects1",
+            "Objects2",
+            "Objects3",
+            "Objects4",
+            "Fence",
+            "House_wall",
+            "windows1",
+            "windows2",
+            "Loja",
+            "Expositor",
+            "Detalhes_loha",
+            "cat",
+        }
+
+        self.foreground_layers = {
+            "House_roof",
+            "Grass_top_details",
+            "Birds",
+        }
+
+        farm_rect = self.map.farm_area
+        tile_size = self.map.scaled_tile_width
+
+        cols = farm_rect.width // tile_size
+        rows = farm_rect.height // tile_size
 
         self.garden = Garden(
-            x=360,
-            y=280,
-            cols=6,
-            rows=3,
-            tile_size=60
+            x=farm_rect.x,
+            y=farm_rect.y,
+            cols=cols,
+            rows=rows,
+            tile_size=tile_size,
+            scale=self.map.scale
         )
         self.font = FontManager.get(14)
         self.font_small = FontManager.get(12)
@@ -48,7 +88,6 @@ class PlayState(BaseState):
         self.shop_overlay = ShopOverlay(self.inventory, self.font, self.shop_title_font)
         self.selected_slot = 0
         self.money = 20
-        self.seed_price = 3
         self.inventory.add_item("seed_cebola", 5)
         self.inventory.add_item("seed_brocolis", 3)
         self.inventory.add_item("seed_trigo", 2)
@@ -67,12 +106,7 @@ class PlayState(BaseState):
         self.slot_spacing = 54
 
         # vendinha
-        self.shop_interaction_rect = pygame.Rect(
-            self.shop_rect.x,
-            self.shop_rect.bottom,
-            self.shop_rect.width,
-            50
-        )
+        self.shop_interaction_rect = self.map.shop_trigger
 
     def handle_event(self, event):
         if self.shop_overlay.is_open:
@@ -182,29 +216,46 @@ class PlayState(BaseState):
     
     def update(self, dt):
         if not self.shop_overlay.is_open:
-            self.player.update(dt, self.obstacles)
+            self.player.update(dt, self.obstacles, self.map.width, self.map.height)
             self.garden.update(dt)
             self.camera.update(self.player.rect)
 
     def draw(self, screen):
-        self.map.draw(screen)
-        self.player.draw(screen)
-        self.map.draw(screen, self.camera)
+        screen.fill((0, 0, 0))
 
-        hint = self.font.render("E: interagir | 1-0: selecionar slot | ESC: menu", True, (20, 20, 20))
+        self.map.draw_layer_group(screen, self.camera, self.background_layers)
+        self.garden.draw(screen, self.camera)
+
+        render_list = []
+        render_list.extend(self.map.get_render_tiles_from_layers(self.depth_layers))
+        render_list.append({
+            "image": self.player.image,
+            "rect": self.player.rect,
+            "depth": self.player.hitbox.bottom
+        })
+
+        render_list.sort(key=lambda obj: obj["depth"])
+
+        for obj in render_list:
+            screen.blit(obj["image"], self.camera.apply(obj["rect"]))
+
+        self.map.draw_layer_group(screen, self.camera, self.foreground_layers)
+
+        hint = self.font.render(
+            "E: interagir | 1-0: selecionar slot | ESC: menu",
+            True,
+            (20, 20, 20)
+        )
         screen.blit(hint, (20, 20))
-        # inventário
-        screen.blit(self.action_panel, self.action_panel_rect)
 
+        screen.blit(self.action_panel, self.action_panel_rect)
+        
         for i in range(self.slot_count):
             slot = self.inventory.get_slot(i)
             slot_x = self.slot_start_x + i * self.slot_spacing
             slot_y = self.slot_start_y
 
             slot_rect = pygame.Rect(slot_x, slot_y, self.slot_width, self.slot_height)
-
-            # debug para ver alinhamento
-            # pygame.draw.rect(screen, (255, 0, 0), slot_rect, 1)
 
             if i == self.selected_slot:
                 pygame.draw.rect(screen, (255, 230, 120), slot_rect, 2)

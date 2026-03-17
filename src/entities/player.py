@@ -1,6 +1,5 @@
 import pygame
 from src.utils.spritesheet import get_sprite
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
 class Player:
     def __init__(self, x, y):
@@ -57,7 +56,7 @@ class Player:
 
         return animations
 
-    def move_and_collide(self, dx, dy, obstacles):
+    def move_and_collide(self, dx, dy, obstacles, world_width, world_height):
         self.hitbox.x += dx
         for obstacle in obstacles:
             if self.hitbox.colliderect(obstacle):
@@ -76,18 +75,18 @@ class Player:
 
         if self.hitbox.left < 0:
             self.hitbox.left = 0
-        if self.hitbox.right > SCREEN_WIDTH:
-            self.hitbox.right = SCREEN_WIDTH
+        if self.hitbox.right > world_width:
+            self.hitbox.right = world_width
         if self.hitbox.top < 0:
             self.hitbox.top = 0
-        if self.hitbox.bottom > SCREEN_HEIGHT:
-            self.hitbox.bottom = SCREEN_HEIGHT
+        if self.hitbox.bottom > world_height:
+            self.hitbox.bottom = world_height
 
         self.x = self.hitbox.centerx
         self.y = self.hitbox.centery - 18
         self.rect.center = (round(self.x), round(self.y))
 
-    def update(self, dt, obstacles):
+    def update(self, dt, obstacles, world_width, world_height):
         keys = pygame.key.get_pressed()
 
         dx = 0
@@ -120,7 +119,7 @@ class Player:
         move_x = dx * self.speed * dt
         move_y = dy * self.speed * dt
 
-        self.move_and_collide(move_x, move_y, obstacles)
+        self.move_and_collide(move_x, move_y, obstacles, world_width, world_height)
 
         if moving:
             self.animation_timer += dt
@@ -132,8 +131,8 @@ class Player:
 
         self.image = self.animations[self.direction][self.current_frame]
 
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
+    def draw(self, screen, camera):
+        screen.blit(self.image, camera.apply(self.rect))
 
         # debug hitbox
         # pygame.draw.rect(screen, (255, 0, 0), self.hitbox, 1)

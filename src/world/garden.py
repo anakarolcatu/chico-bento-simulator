@@ -1,13 +1,18 @@
 import pygame
 from src.data.crops import CROPS
+from src.utils.spritesheet import get_sprite
 
 class Garden:
-    def __init__(self, x, y, cols, rows, tile_size):
+    def __init__(self, x, y, cols, rows, tile_size, scale=1):
         self.x = x
         self.y = y
         self.cols = cols
         self.rows = rows
         self.tile_size = tile_size
+        self.scale = scale
+        self.plant_stage_cache = {}
+        self.hoed_tile = self.create_hoed_tile()
+        self.load_plant_stage_sprites()
 
         self.tiles = []
         for row in range(rows):
@@ -15,7 +20,8 @@ class Garden:
             for col in range(cols):
                 row_tiles.append({
                     "state": "empty",
-                    "growth_timer": 0, 
+                    "growth_timer": 0,
+                    "growth_time": 0,
                     "crop_type": None
                 })
             self.tiles.append(row_tiles)
@@ -39,6 +45,69 @@ class Garden:
             return int(row), int(col)
 
         return None
+    
+    def create_hoed_tile(self):
+        tile = pygame.Surface((self.tile_size, self.tile_size), pygame.SRCALPHA)
+
+        pygame.draw.rect(tile, (120, 78, 45), (0, 0, self.tile_size, self.tile_size), border_radius=4)
+
+        line_color = (95, 58, 30)
+        padding_x = 8
+        spacing = 10
+
+        y = 10
+        while y < self.tile_size - 6:
+            pygame.draw.line(tile, line_color, (padding_x, y), (self.tile_size - padding_x, y), 2)
+            y += spacing
+
+        return tile
+    
+    def load_plant_stage_sprites(self):
+        loaded_sheets = {}
+
+        def get_sheet(path):
+            if path not in loaded_sheets:
+                loaded_sheets[path] = pygame.image.load(path).convert_alpha()
+            return loaded_sheets[path]
+
+        for seed_name, crop_data in CROPS.items():
+            if "plant_sheet" not in crop_data or "growth_stages" not in crop_data:
+                continue
+
+            sheet = get_sheet(crop_data["plant_sheet"])
+            crop_name = crop_data["crop_name"]
+
+            stage_surfaces = []
+
+            for x, y, w, h in crop_data["growth_stages"]:
+                sprite = get_sprite(sheet, x, y, w, h)
+
+                scaled_w = int(w * self.scale)
+                scaled_h = int(h * self.scale)
+                sprite = pygame.transform.scale(sprite, (scaled_w, scaled_h))
+
+                stage_surfaces.append(sprite)
+
+            self.plant_stage_cache[crop_name] = stage_surfaces
+
+    def get_stage_index(self, tile):
+        if tile["state"] == "grown":
+            return 2
+
+        if tile["state"] != "planted":
+            return None
+
+        if tile["growth_time"] <= 0:
+            return 0
+
+        progress = tile["growth_timer"] / tile["growth_time"]
+
+        if progress < 0.34:
+            return 0
+        elif progress < 0.67:
+            return 1
+        else:
+            return 2
 
     def hoe_tile(self, row, col):
         if self.tiles[row][col]["state"] == "empty":
@@ -77,42 +146,29 @@ class Garden:
         return None
 
 
-    def draw(self, screen):
+    def draw(self, screen, camera):
         for row in range(self.rows):
             for col in range(self.cols):
                 tile = self.tiles[row][col]
-                rect = self.get_tile_rect(row, col)
-                inner_rect = rect.inflate(-8, -8)
 
-                if tile["state"] == "empty":
-                    color = (110, 70, 40)
+                world_rect = self.get_tile_rect(row, col)
+                screen_rect = camera.apply(world_rect)
 
-                elif tile["state"] in ("hoed", "planted", "grown"):
-                    color = (85, 52, 28)
+                # solo arado
+                if tile["state"] in ("hoed", "planted", "grown"):
+                    screen.blit(self.hoed_tile, screen_rect.topleft)
 
-                else:
-                    color = (110, 70, 40)
+                # planta
+                if tile["state"] in ("planted", "grown") and tile["crop_type"]:
+                    stage_index = self.get_stage_index(tile)
 
-                pygame.draw.rect(screen, color, inner_rect, border_radius=4)
+                    if stage_index is not None:
+                        stages = self.plant_stage_cache.get(tile["crop_type"])
 
-                if tile["state"] == "planted":
-                    cx = rect.centerx
-                    cy = rect.centery + 4
-                    plant_color = (40, 170, 40)
-                    for seed_name, crop_data in CROPS.items():
-                        if crop_data["crop_name"] == tile["crop_type"]:
-                            plant_color = crop_data["color"]
-                            break
-                    pygame.draw.circle(screen, plant_color, (cx, cy), 6)
+                        if stages and stage_index < len(stages):
+                            plant_img = stages[stage_index]
 
-                elif tile["state"] == "grown":
-                    cx = rect.centerx
-                    cy = rect.centery + 2
-                    plant_color = (40, 170, 40)
-                    for seed_name, crop_data in CROPS.items():
-                        if crop_data["crop_name"] == tile["crop_type"]:
-                            plant_color = crop_data["color"]
-                            break
-
-                    pygame.draw.rect(screen, (30, 120, 30), (cx - 4, cy - 16, 8, 10), border_radius=2)
-                    pygame.draw.circle(screen, plant_color, (cx, cy), 10)
+                            plant_rect = plant_img.get_rect(
+                                midbottom=(screen_rect.centerx, screen_rect.bottom)
+                            )
+                            screen.blit(plant_img, plant_rect)
