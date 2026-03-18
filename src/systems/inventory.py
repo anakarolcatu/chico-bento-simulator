@@ -34,6 +34,16 @@ class Inventory:
 
         return False
 
+    def to_dict(self):
+        return {
+            "size": self.size,
+            "slots": self.slots
+        }
+
+    def load_from_dict(self, data):
+        self.size = data["size"]
+        self.slots = data["slots"]
+
     def get_amount(self, item_name):
         total = 0
         for slot in self.slots:

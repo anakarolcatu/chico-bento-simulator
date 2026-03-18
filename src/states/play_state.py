@@ -11,14 +11,24 @@ from src.ui.shop_overlay import ShopOverlay
 from src.core.font_manager import FontManager
 from src.world.tiled_map import TiledMap
 from src.world.camera import Camera
+from src.ui.pause_menu import PauseMenu
+from src.ui.controls_overlay import ControlsOverlay
+from src.systems.save_manager import SaveManager
 
 class PlayState(BaseState):
     def __init__(self, game):
         super().__init__(game)
 
         self.map = TiledMap("assets/maps/GameKit.tmx", scale=3)
+
+        self.font = FontManager.get(14)
+        self.font_small = FontManager.get(12)
+        self.shop_title_font = FontManager.get(18)
+
         spawn_x, spawn_y = self.map.player_spawn
         self.player = Player(spawn_x, spawn_y)
+        self.pause_menu = PauseMenu(self.font, self.shop_title_font)
+        self.controls_overlay = ControlsOverlay(self.font, self.shop_title_font)
 
         # Grupo de layers para renderização
         self.background_layers = {
@@ -69,9 +79,6 @@ class PlayState(BaseState):
             tile_size=tile_size,
             scale=self.map.scale
         )
-        self.font = FontManager.get(14)
-        self.font_small = FontManager.get(12)
-        self.shop_title_font = FontManager.get(18)
 
         self.obstacles = self.map.collision_rects
 
@@ -112,10 +119,36 @@ class PlayState(BaseState):
         if self.shop_overlay.is_open:
             self.money = self.shop_overlay.handle_event(event, self.money)
             return
+        
+        if self.controls_overlay.is_open:
+            closed = self.controls_overlay.handle_event(event)
+
+            if closed:
+                self.pause_menu.open()
+
+            return
+        
+        if self.pause_menu.is_open:
+            action = self.pause_menu.handle_event(event)
+
+            if action == "CONTINUAR":
+                self.pause_menu.close()
+
+            elif action == "SALVAR":
+                print("Salvar jogo")
+
+            elif action == "CONTROLES":
+                self.pause_menu.close()
+                self.controls_overlay.open()
+
+            elif action == "SAIR":
+                self.game.change_state(MenuState(self.game))
+
+            return
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                self.game.change_state(MenuState(self.game))
+                self.pause_menu.open()
 
             elif event.key == pygame.K_e:
                 if self.player.hitbox.colliderect(self.shop_interaction_rect):
@@ -215,10 +248,19 @@ class PlayState(BaseState):
         return True
     
     def update(self, dt):
-        if not self.shop_overlay.is_open:
-            self.player.update(dt, self.obstacles, self.map.width, self.map.height)
-            self.garden.update(dt)
-            self.camera.update(self.player.rect)
+        if self.shop_overlay.is_open:
+            return
+        
+        if self.controls_overlay.is_open:
+            return
+
+        if self.pause_menu.is_open:
+            self.pause_menu.update_hover()
+            return
+
+        self.player.update(dt, self.obstacles, self.map.width, self.map.height)
+        self.garden.update(dt)
+        self.camera.update(self.player.rect)
 
     def draw(self, screen):
         screen.fill((0, 0, 0))
@@ -240,13 +282,6 @@ class PlayState(BaseState):
             screen.blit(obj["image"], self.camera.apply(obj["rect"]))
 
         self.map.draw_layer_group(screen, self.camera, self.foreground_layers)
-
-        hint = self.font.render(
-            "E: interagir | 1-0: selecionar slot | ESC: menu",
-            True,
-            (20, 20, 20)
-        )
-        screen.blit(hint, (20, 20))
 
         screen.blit(self.action_panel, self.action_panel_rect)
         
@@ -288,3 +323,5 @@ class PlayState(BaseState):
         screen.blit(money_text, (20, 50))
 
         self.shop_overlay.draw(screen, self.money)
+        self.pause_menu.draw(screen)
+        self.controls_overlay.draw(screen)

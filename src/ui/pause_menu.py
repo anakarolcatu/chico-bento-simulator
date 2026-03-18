@@ -14,23 +14,24 @@ class PauseMenu:
         self.options = ["CONTINUAR", "SALVAR", "CONTROLES", "SAIR"]
 
         sheet = pygame.image.load("assets/ui/Main_menu.png").convert_alpha()
+        buttons_sheet = pygame.image.load("assets/ui/Buttons.png").convert_alpha()
 
         # painel
-        panel_base = get_sprite(sheet, 97, 2, 33, 65)
-        self.panel = nine_slice(panel_base, 320, 300, 4)
+        panel_base = get_sprite(sheet, 98, 4, 80, 168)
+        self.panel = nine_slice(panel_base, 240, 300, 4)
         self.panel_rect = self.panel.get_rect(center=(640, 360))
 
         # botões
-        normal_button = get_sprite(sheet, 104, 130, 32, 15)
-        selected_button = get_sprite(sheet, 8, 130, 32, 15)
-        pressed_button = get_sprite(sheet, 56, 130, 32, 15)
+        normal_button = get_sprite(buttons_sheet, 307, 141, 44, 15)
+        selected_button = get_sprite(buttons_sheet, 211, 141, 44, 15)
+        pressed_button = get_sprite(buttons_sheet, 259, 142, 44, 15)
 
         normal_button = pygame.transform.scale(normal_button, (190, 52))
         selected_button = pygame.transform.scale(selected_button, (190, 52))
         pressed_button = pygame.transform.scale(pressed_button, (190, 52))
 
         center_x = self.panel_rect.centerx
-        start_y = self.panel_rect.y + 95
+        start_y = self.panel_rect.y + 90
         gap = 56
 
         self.buttons = [

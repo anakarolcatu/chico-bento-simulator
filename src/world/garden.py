@@ -121,6 +121,29 @@ class Garden:
             tile["growth_time"] = growth_time
             tile["crop_type"] = crop_type
 
+    def to_dict(self):
+        return {
+            "x": self.x,
+            "y": self.y,
+            "cols": self.cols,
+            "rows": self.rows,
+            "tile_size": self.tile_size,
+            "scale": self.scale,
+            "tiles": self.tiles
+        }
+
+    def load_from_dict(self, data):
+        self.x = data["x"]
+        self.y = data["y"]
+        self.cols = data["cols"]
+        self.rows = data["rows"]
+        self.tile_size = data["tile_size"]
+        self.scale = data["scale"]
+        self.tiles = data["tiles"]
+
+        self.hoed_tile = self.create_hoed_tile()
+        self.load_plant_stage_sprites()
+
     def update(self, dt):
         for row in range(self.rows):
             for col in range(self.cols):
