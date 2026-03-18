@@ -1,26 +1,17 @@
 {
     "player": {
-        "x": 1400,
-        "y": 316,
-        "direction": "up"
+        "x": 1526,
+        "y": 811,
+        "direction": "down"
     },
-    "money": 35,
-    "selected_slot": 0,
+    "money": 87,
+    "selected_slot": 7,
     "inventory": {
         "size": 10,
         "slots": [
-            {
-                "item": "seed_cebola",
-                "amount": 1
-            },
-            {
-                "item": "seed_brocolis",
-                "amount": 3
-            },
-            {
-                "item": "seed_trigo",
-                "amount": 5
-            },
+            null,
+            null,
+            null,
             null,
             null,
             null,
@@ -132,37 +123,37 @@
                     "crop_type": null
                 },
                 {
-                    "state": "empty",
+                    "state": "grown",
+                    "growth_timer": 5.017999999999985,
+                    "growth_time": 5,
+                    "crop_type": "trigo"
+                },
+                {
+                    "state": "hoed",
                     "growth_timer": 0,
                     "growth_time": 0,
                     "crop_type": null
                 },
                 {
-                    "state": "empty",
+                    "state": "hoed",
                     "growth_timer": 0,
                     "growth_time": 0,
                     "crop_type": null
                 },
                 {
-                    "state": "empty",
+                    "state": "hoed",
                     "growth_timer": 0,
                     "growth_time": 0,
                     "crop_type": null
                 },
                 {
-                    "state": "empty",
+                    "state": "hoed",
                     "growth_timer": 0,
                     "growth_time": 0,
                     "crop_type": null
                 },
                 {
-                    "state": "empty",
-                    "growth_timer": 0,
-                    "growth_time": 0,
-                    "crop_type": null
-                },
-                {
-                    "state": "empty",
+                    "state": "hoed",
                     "growth_timer": 0,
                     "growth_time": 0,
                     "crop_type": null

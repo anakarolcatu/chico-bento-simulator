@@ -14,6 +14,7 @@ from src.world.camera import Camera
 from src.ui.pause_menu import PauseMenu
 from src.ui.controls_overlay import ControlsOverlay
 from src.systems.save_manager import SaveManager
+from src.utils.asset_loader import AssetLoader
 
 class PlayState(BaseState):
     def __init__(self, game):
@@ -98,13 +99,13 @@ class PlayState(BaseState):
         self.inventory.add_item("seed_cebola", 5)
         self.inventory.add_item("seed_brocolis", 3)
         self.inventory.add_item("seed_trigo", 2)
-        self.item_icons = self.load_item_icons()
+        self.item_icons = AssetLoader.load_crop_icons((24, 24))
         
         # fundo do inventário
-        sheet = pygame.image.load("assets/ui/Action_panel.png").convert_alpha()
+        sheet = AssetLoader.load_image("assets/ui/Action_panel.png")
         panel_base = get_sprite(sheet, 12, 43, 169, 22)
         money_panel = get_sprite(sheet, 13, 77, 22, 19)
-        shop_sheet = pygame.image.load("assets/ui/Shop.png").convert_alpha()
+        shop_sheet = AssetLoader.load_image("assets/ui/Shop.png")
         self.coin_img = get_sprite(shop_sheet, 483, 163, 11, 11)
         self.coin_img = pygame.transform.scale(self.coin_img, (18, 18))
         self.action_panel = pygame.transform.scale(panel_base, (560, 80))
@@ -257,34 +258,6 @@ class PlayState(BaseState):
     def show_feedback(self, message):
         self.feedback_message = message
         self.feedback_timer = self.feedback_duration
-
-    def load_item_icons(self):
-        icons = {}
-        loaded_sheets = {}
-
-        def get_sheet(path):
-            if path not in loaded_sheets:
-                loaded_sheets[path] = pygame.image.load(path).convert_alpha()
-            return loaded_sheets[path]
-
-        for seed_name, crop_data in CROPS.items():
-            if "seed_sheet" in crop_data and "seed_icon" in crop_data:
-                seed_sheet = get_sheet(crop_data["seed_sheet"])
-                x, y, w, h = crop_data["seed_icon"]
-
-                icon = get_sprite(seed_sheet, x, y, w, h)
-                icon = pygame.transform.scale(icon, (24, 24))
-                icons[seed_name] = icon
-
-            if "crop_sheet" in crop_data and "crop_icon" in crop_data:
-                crop_sheet = get_sheet(crop_data["crop_sheet"])
-                x, y, w, h = crop_data["crop_icon"]
-
-                icon = get_sprite(crop_sheet, x, y, w, h)
-                icon = pygame.transform.scale(icon, (24, 24))
-                icons[crop_data["crop_name"]] = icon
-
-        return icons
 
 
     def draw_inventory_item_icon(self, screen, item_name, slot_rect):

@@ -2,6 +2,7 @@ import pygame
 from src.utils.spritesheet import get_sprite
 from src.utils.ui_helper import nine_slice
 from src.data.crops import CROPS
+from src.utils.asset_loader import AssetLoader
 
 
 class ShopOverlay:
@@ -24,7 +25,7 @@ class ShopOverlay:
 
         self.buy_items = list(CROPS.keys())
 
-        sheet = pygame.image.load("assets/ui/Shop.png").convert_alpha()
+        sheet = AssetLoader.load_image("assets/ui/Shop.png")
 
         # recortes base
         panel_base = get_sprite(sheet, 7, 0, 115, 149)
@@ -42,7 +43,7 @@ class ShopOverlay:
         self.right_rect = self.right_panel.get_rect(center=(820, 260))
 
         # ícones de sementes e plantas
-        self.item_icons = self.load_item_icons()
+        self.item_icons = AssetLoader.load_crop_icons((26, 26))
 
         self.header_offset_y = 16
 
@@ -102,36 +103,6 @@ class ShopOverlay:
                 unique_items.append(item)
 
         return unique_items
-    
-    def load_item_icons(self):
-        icons = {}
-        loaded_sheets = {}
-
-        def get_sheet(path):
-            if path not in loaded_sheets:
-                loaded_sheets[path] = pygame.image.load(path).convert_alpha()
-            return loaded_sheets[path]
-
-        for seed_name, crop_data in CROPS.items():
-            # ícone da semente
-            if "seed_sheet" in crop_data and "seed_icon" in crop_data:
-                seed_sheet = get_sheet(crop_data["seed_sheet"])
-                x, y, w, h = crop_data["seed_icon"]
-
-                icon = get_sprite(seed_sheet, x, y, w, h)
-                icon = pygame.transform.scale(icon, (26, 26))
-                icons[seed_name] = icon
-
-            # ícone da colheita
-            if "crop_sheet" in crop_data and "crop_icon" in crop_data:
-                crop_sheet = get_sheet(crop_data["crop_sheet"])
-                x, y, w, h = crop_data["crop_icon"]
-
-                icon = get_sprite(crop_sheet, x, y, w, h)
-                icon = pygame.transform.scale(icon, (26, 26))
-                icons[crop_data["crop_name"]] = icon
-
-        return icons
 
     def move_grid_selection(self, current_index, key, total_items):
         cols = self.grid_cols
