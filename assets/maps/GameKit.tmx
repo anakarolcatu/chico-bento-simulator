@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="38" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="65" nextobjectid="77">
  <tileset firstgid="1" name="ground_grass_details" tilewidth="16" tileheight="16" tilecount="378" columns="21">
-  <image source="../../../../../../../Downloads/craftpix-net-654184-main-characters-home-free-top-down-pixel-art-asset/Tiled_files/ground_grass_details.png" width="336" height="288"/>
+  <image source="tilesets/ground_grass_details.png" width="336" height="288"/>
  </tileset>
  <tileset firstgid="379" name="ground_grass_details" tilewidth="16" tileheight="16" tilecount="378" columns="21">
-  <image source="../../../../../../../Downloads/craftpix-net-654184-main-characters-home-free-top-down-pixel-art-asset/Tiled_files/ground_grass_details.png" width="336" height="288"/>
+  <image source="tilesets/ground_grass_details.png" width="336" height="288"/>
  </tileset>
  <tileset firstgid="757" name="exterior" tilewidth="16" tileheight="16" tilecount="969" columns="17">
-  <image source="../../../../../../../Downloads/craftpix-net-654184-main-characters-home-free-top-down-pixel-art-asset/Tiled_files/exterior.png" width="272" height="912"/>
+  <image source="tilesets/exterior.png" width="272" height="912"/>
  </tileset>
  <tileset firstgid="1726" name="house_details" tilewidth="16" tileheight="16" tilecount="170" columns="10">
-  <image source="../../../../../../../Downloads/craftpix-net-654184-main-characters-home-free-top-down-pixel-art-asset/Tiled_files/house_details.png" width="160" height="272"/>
+  <image source="tilesets/house_details.png" width="160" height="272"/>
  </tileset>
  <tileset firstgid="1896" name="Smoke_animation" tilewidth="16" tileheight="16" tilecount="54" columns="18">
-  <image source="../../../../../../../Downloads/craftpix-net-654184-main-characters-home-free-top-down-pixel-art-asset/Tiled_files/Smoke_animation.png" width="288" height="48"/>
+  <image source="tilesets/Smoke_animation.png" width="288" height="48"/>
   <tile id="0">
    <animation>
     <frame tileid="0" duration="150"/>
@@ -106,7 +106,7 @@
   </tile>
  </tileset>
  <tileset firstgid="1950" name="Doors_windows_animation" tilewidth="16" tileheight="16" tilecount="204" columns="17">
-  <image source="../../../../../../../Downloads/craftpix-net-654184-main-characters-home-free-top-down-pixel-art-asset/Tiled_files/Doors_windows_animation.png" width="272" height="192"/>
+  <image source="tilesets/Doors_windows_animation.png" width="272" height="192"/>
   <tile id="0">
    <animation>
     <frame tileid="0" duration="600"/>
@@ -449,7 +449,7 @@
   </tile>
  </tileset>
  <tileset firstgid="2154" name="bird_jump_animation" tilewidth="16" tileheight="16" tilecount="240" columns="40">
-  <image source="../../../../../../../Downloads/craftpix-net-654184-main-characters-home-free-top-down-pixel-art-asset/Tiled_files/bird_jump_animation.png" width="640" height="96"/>
+  <image source="tilesets/bird_jump_animation.png" width="640" height="96"/>
   <tile id="0">
    <animation>
     <frame tileid="0" duration="150"/>
@@ -3815,7 +3815,7 @@
   </tile>
  </tileset>
  <tileset firstgid="4122" name="Trees_animation" tilewidth="16" tileheight="16" tilecount="2340" columns="36">
-  <image source="../../../../../../../Downloads/craftpix-net-654184-main-characters-home-free-top-down-pixel-art-asset/Tiled_files/Trees_animation.png" width="576" height="1040"/>
+  <image source="tilesets/Trees_animation.png" width="576" height="1040"/>
   <tile id="12">
    <animation>
     <frame tileid="12" duration="150"/>
@@ -7150,7 +7150,7 @@
   </tile>
  </tileset>
  <tileset firstgid="6462" name="cat_animation" tilewidth="16" tileheight="16" tilecount="216" columns="6">
-  <image source="../../../../../../../Downloads/craftpix-net-654184-main-characters-home-free-top-down-pixel-art-asset/Tiled_files/cat_animation.png" width="96" height="576"/>
+  <image source="tilesets/cat_animation.png" width="96" height="576"/>
   <tile id="0">
    <animation>
     <frame tileid="0" duration="150"/>
@@ -7495,7 +7495,7 @@
   <image source="tilesets/Supplies.png" width="288" height="224"/>
  </tileset>
  <tileset firstgid="8226" name="Exterior_house" tilewidth="16" tileheight="16" tilecount="325" columns="25">
-  <image source="../../../../../../../Downloads/craftpix-net-692491-free-glassblowers-workshop-top-down-pixel-art-asset/PNG/Exterior_house.png" width="400" height="208"/>
+  <image source="tilesets/Exterior_house.png" width="400" height="208"/>
  </tileset>
  <layer id="31" name="Ground" width="38" height="32">
   <data encoding="csv">

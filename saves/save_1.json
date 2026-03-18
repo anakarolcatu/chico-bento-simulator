@@ -1,17 +1,26 @@
 {
     "player": {
-        "x": 1526,
-        "y": 811,
-        "direction": "down"
+        "x": 1434,
+        "y": 316,
+        "direction": "up"
     },
-    "money": 87,
-    "selected_slot": 7,
+    "money": 20,
+    "selected_slot": 0,
     "inventory": {
         "size": 10,
         "slots": [
-            null,
-            null,
-            null,
+            {
+                "item": "cebola",
+                "amount": 3
+            },
+            {
+                "item": "seed_brocolis",
+                "amount": 3
+            },
+            {
+                "item": "seed_trigo",
+                "amount": 2
+            },
             null,
             null,
             null,
@@ -123,46 +132,46 @@
                     "crop_type": null
                 },
                 {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "hoed",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
                     "state": "grown",
-                    "growth_timer": 5.017999999999985,
-                    "growth_time": 5,
-                    "crop_type": "trigo"
+                    "growth_timer": 4.009999999999997,
+                    "growth_time": 4,
+                    "crop_type": "cebola"
                 },
                 {
-                    "state": "hoed",
-                    "growth_timer": 0,
-                    "growth_time": 0,
-                    "crop_type": null
-                },
-                {
-                    "state": "hoed",
-                    "growth_timer": 0,
-                    "growth_time": 0,
-                    "crop_type": null
-                },
-                {
-                    "state": "hoed",
-                    "growth_timer": 0,
-                    "growth_time": 0,
-                    "crop_type": null
-                },
-                {
-                    "state": "hoed",
-                    "growth_timer": 0,
-                    "growth_time": 0,
-                    "crop_type": null
-                },
-                {
-                    "state": "hoed",
-                    "growth_timer": 0,
-                    "growth_time": 0,
-                    "crop_type": null
-                },
-                {
-                    "state": "hoed",
-                    "growth_timer": 0,
-                    "growth_time": 0,
-                    "crop_type": null
+                    "state": "grown",
+                    "growth_timer": 4.0109999999999975,
+                    "growth_time": 4,
+                    "crop_type": "cebola"
                 },
                 {
                     "state": "hoed",
