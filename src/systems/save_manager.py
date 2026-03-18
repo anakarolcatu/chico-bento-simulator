@@ -30,5 +30,14 @@ class SaveManager:
         if not os.path.exists(cls.SAVE_PATH):
             return None
 
-        with open(cls.SAVE_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
+        try:
+            with open(cls.SAVE_PATH, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+
+                if not content:
+                    return None
+
+                return json.loads(content)
+
+        except (json.JSONDecodeError, OSError):
+            return None

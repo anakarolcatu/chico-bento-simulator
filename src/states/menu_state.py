@@ -5,6 +5,7 @@ from src.utils.spritesheet import get_sprite
 from src.utils.ui_helper import nine_slice
 from settings import BLACK, BROWN, DARK_GREEN, MENU_BG, SCREEN_WIDTH, SCREEN_HEIGHT
 from src.core.font_manager import FontManager
+from src.ui.controls_overlay import ControlsOverlay
 
 class MenuState(BaseState):
     def __init__(self, game):
@@ -16,6 +17,9 @@ class MenuState(BaseState):
             "CHICO BENTO",
             "SIMULATOR"
         ]
+
+        self.controls_overlay = ControlsOverlay(self.font, self.title_font)
+        self.game.audio.play_music("assets/sounds/ChicoBentoSimulator.mp3", loops=-1, volume=0.4)
 
         # Imagem de fundo 
         img = pygame.image.load(MENU_BG).convert()
@@ -73,6 +77,11 @@ class MenuState(BaseState):
         self.selected = 0
         self.update_selection()
 
+        # Mensagem de jogo salvo
+        self.feedback_message = ""
+        self.feedback_timer = 0
+        self.feedback_duration = 2.5
+
     def update_selection(self):
         for i, button in enumerate(self.buttons):
             if i == self.selected:
@@ -81,20 +90,29 @@ class MenuState(BaseState):
                 button.set_state("normal")
 
     def handle_event(self, event):
+        if self.controls_overlay.is_open:
+            self.controls_overlay.handle_event(event)
+            return
+        
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
                 self.selected = (self.selected -1) % len(self.options)
                 self.update_selection()
+                self.game.audio.play_sound("menu_select")
             elif event.key == pygame.K_DOWN:
                 self.selected = (self.selected + 1) % len(self.options)
                 self.update_selection()
+                self.game.audio.play_sound("menu_select")
             elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                self.game.audio.play_sound("pause_menu")
                 self.activate_selected()
+
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             for i, button in enumerate(self.buttons):
                 if button.rect.collidepoint(event.pos):
                     self.selected = i
                     self.update_selection()
+                    self.game.audio.play_sound("pause_menu")
                     self.activate_selected()
 
     def activate_selected(self):
@@ -103,19 +121,42 @@ class MenuState(BaseState):
             from src.states.play_state import PlayState
             self.game.change_state(PlayState(self.game))
         elif option == 1:
-            print("Carregar jogo")
+            from src.states.play_state import PlayState
+            from src.systems.save_manager import SaveManager
+
+            save_data = SaveManager.load_game()
+
+            if save_data:
+                play_state = PlayState(self.game)
+                play_state.load_game_data(save_data)
+                self.game.change_state(play_state)
+            else:
+                self.show_feedback("NENHUM SAVE ENCONTRADO")
         elif option == 2:
-            print("Exibir controles")
+            self.controls_overlay.open()
         elif option == 3:
             self.game.running = False
 
     def update(self, dt):
+        if self.controls_overlay.is_open:
+            return
+        
         mouse_pos = pygame.mouse.get_pos()
         
         for i, button in enumerate(self.buttons):
             if button.rect.collidepoint(mouse_pos):
                 self.selected = i
                 self.update_selection()
+
+        if self.feedback_timer > 0:
+            self.feedback_timer -= dt
+            if self.feedback_timer <= 0:
+                self.feedback_message = ""
+                self.feedback_timer = 0
+
+    def show_feedback(self, message):
+        self.feedback_message = message
+        self.feedback_timer = self.feedback_duration
 
     def draw(self, screen):
         screen.blit(self.background, self.bg_rect)
@@ -152,3 +193,20 @@ class MenuState(BaseState):
 
         for button in self.buttons:
             button.draw(screen)
+        
+        hint_text = "SETAS OU MOUSE PARA SELECIONAR | ENTER PARA CONFIRMAR"
+        hint_surface = self.font.render(hint_text, False, BLACK)
+        hint_rect = hint_surface.get_rect(center=(SCREEN_WIDTH // 2, self.panel_rect.bottom + 18))
+
+        if self.feedback_message:
+            feedback_surface = self.font.render(self.feedback_message, False, BLACK)
+            feedback_rect = feedback_surface.get_rect(center=(SCREEN_WIDTH // 2, self.panel_rect.bottom + 40))
+
+            shadow_surface = self.font.render(self.feedback_message, False, BROWN)
+            shadow_rect = shadow_surface.get_rect(center=(feedback_rect.centerx + 2, feedback_rect.centery + 2))
+
+            screen.blit(shadow_surface, shadow_rect)
+            screen.blit(feedback_surface, feedback_rect)
+
+        screen.blit(hint_surface, hint_rect)
+        self.controls_overlay.draw(screen)

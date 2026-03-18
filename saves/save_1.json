@@ -1,0 +1,731 @@
+{
+    "player": {
+        "x": 1400,
+        "y": 316,
+        "direction": "up"
+    },
+    "money": 35,
+    "selected_slot": 0,
+    "inventory": {
+        "size": 10,
+        "slots": [
+            {
+                "item": "seed_cebola",
+                "amount": 1
+            },
+            {
+                "item": "seed_brocolis",
+                "amount": 3
+            },
+            {
+                "item": "seed_trigo",
+                "amount": 5
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ]
+    },
+    "garden": {
+        "x": 145,
+        "y": 1057,
+        "cols": 14,
+        "rows": 8,
+        "tile_size": 48,
+        "scale": 3,
+        "tiles": [
+            [
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                }
+            ],
+            [
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "hoed",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "hoed",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "hoed",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "hoed",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                }
+            ],
+            [
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                }
+            ],
+            [
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                }
+            ],
+            [
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                }
+            ],
+            [
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                }
+            ],
+            [
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                }
+            ],
+            [
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                },
+                {
+                    "state": "empty",
+                    "growth_timer": 0,
+                    "growth_time": 0,
+                    "crop_type": null
+                }
+            ]
+        ]
+    }
+}

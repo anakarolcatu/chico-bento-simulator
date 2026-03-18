@@ -27,7 +27,7 @@ class PlayState(BaseState):
 
         spawn_x, spawn_y = self.map.player_spawn
         self.player = Player(spawn_x, spawn_y)
-        self.pause_menu = PauseMenu(self.font, self.shop_title_font)
+        self.pause_menu = PauseMenu(self.game, self.font, self.shop_title_font)
         self.controls_overlay = ControlsOverlay(self.font, self.shop_title_font)
 
         # Grupo de layers para renderização
@@ -92,7 +92,7 @@ class PlayState(BaseState):
 
         # Inventário
         self.inventory = Inventory(size=10)
-        self.shop_overlay = ShopOverlay(self.inventory, self.font, self.shop_title_font)
+        self.shop_overlay = ShopOverlay(self.inventory, self.font, self.shop_title_font, self.game.audio)
         self.selected_slot = 0
         self.money = 20
         self.inventory.add_item("seed_cebola", 5)
@@ -103,8 +103,16 @@ class PlayState(BaseState):
         # fundo do inventário
         sheet = pygame.image.load("assets/ui/Action_panel.png").convert_alpha()
         panel_base = get_sprite(sheet, 12, 43, 169, 22)
+        money_panel = get_sprite(sheet, 13, 77, 22, 19)
+        shop_sheet = pygame.image.load("assets/ui/Shop.png").convert_alpha()
+        self.coin_img = get_sprite(shop_sheet, 483, 163, 11, 11)
+        self.coin_img = pygame.transform.scale(self.coin_img, (18, 18))
         self.action_panel = pygame.transform.scale(panel_base, (560, 80))
+        self.money_panel = pygame.transform.scale(money_panel, (72, 72))
         self.action_panel_rect = self.action_panel.get_rect(midbottom=(SCREEN_WIDTH // 2, SCREEN_HEIGHT))
+        self.money_panel_rect = self.money_panel.get_rect(
+            midright=(self.action_panel_rect.left - 10, self.action_panel_rect.centery)
+        )
         self.slot_count = 10
         self.slot_width = 48
         self.slot_height = 48
@@ -114,6 +122,15 @@ class PlayState(BaseState):
 
         # vendinha
         self.shop_interaction_rect = self.map.shop_trigger
+
+        # Salvar jogo
+        self.feedback_message = ""
+        self.feedback_timer = 0
+        self.feedback_duration = 2.0
+
+        # sons 
+        self.walk_sound_timer = 0
+        self.walk_sound_interval = 0.36
 
     def handle_event(self, event):
         if self.shop_overlay.is_open:
@@ -131,11 +148,18 @@ class PlayState(BaseState):
         if self.pause_menu.is_open:
             action = self.pause_menu.handle_event(event)
 
+            if action == "CLOSE":
+                self.game.audio.resume_music()
+
             if action == "CONTINUAR":
                 self.pause_menu.close()
+                self.game.audio.resume_music()
 
             elif action == "SALVAR":
-                print("Salvar jogo")
+                self.save_game()
+                self.pause_menu.close()
+                self.game.audio.resume_music()
+                self.show_feedback("JOGO SALVO")
 
             elif action == "CONTROLES":
                 self.pause_menu.close()
@@ -149,10 +173,13 @@ class PlayState(BaseState):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.pause_menu.open()
+                self.game.audio.pause_music()
+                self.game.audio.play_sound("pause_menu")
 
             elif event.key == pygame.K_e:
                 if self.player.hitbox.colliderect(self.shop_interaction_rect):
                     self.shop_overlay.open()
+                    self.game.audio.play_sound("pause_menu")
                 else:
                     self.handle_garden_interaction()
 
@@ -199,12 +226,37 @@ class PlayState(BaseState):
                     crop_type = crop_data["crop_name"]
                     growth_time = crop_data["growth_time"]
                     self.garden.plant_tile(row, col, crop_type, growth_time)
+                    self.game.audio.play_sound("planting")
 
         elif tile["state"] == "grown":
             harvested_crop = self.garden.harvest_tile(row, col)
 
             if harvested_crop is not None:
                 self.inventory.add_item(harvested_crop, 1)
+                self.game.audio.play_sound("harvest")
+
+    def save_game(self):
+        SaveManager.save_game(self)
+        print("Jogo salvo com sucesso.")
+
+
+    def load_game_data(self, data):
+        self.player.x = data["player"]["x"]
+        self.player.y = data["player"]["y"]
+        self.player.direction = data["player"]["direction"]
+
+        self.player.rect.center = (round(self.player.x), round(self.player.y))
+        self.player.hitbox.center = (self.player.x, self.player.y + 18)
+
+        self.money = data["money"]
+        self.selected_slot = data["selected_slot"]
+
+        self.inventory.load_from_dict(data["inventory"])
+        self.garden.load_from_dict(data["garden"])
+
+    def show_feedback(self, message):
+        self.feedback_message = message
+        self.feedback_timer = self.feedback_duration
 
     def load_item_icons(self):
         icons = {}
@@ -216,7 +268,6 @@ class PlayState(BaseState):
             return loaded_sheets[path]
 
         for seed_name, crop_data in CROPS.items():
-            # ícone da semente
             if "seed_sheet" in crop_data and "seed_icon" in crop_data:
                 seed_sheet = get_sheet(crop_data["seed_sheet"])
                 x, y, w, h = crop_data["seed_icon"]
@@ -225,7 +276,6 @@ class PlayState(BaseState):
                 icon = pygame.transform.scale(icon, (24, 24))
                 icons[seed_name] = icon
 
-            # ícone da colheita
             if "crop_sheet" in crop_data and "crop_icon" in crop_data:
                 crop_sheet = get_sheet(crop_data["crop_sheet"])
                 x, y, w, h = crop_data["crop_icon"]
@@ -248,6 +298,12 @@ class PlayState(BaseState):
         return True
     
     def update(self, dt):
+        if self.feedback_timer > 0:
+            self.feedback_timer -= dt
+            if self.feedback_timer <= 0:
+                self.feedback_message = ""
+                self.feedback_timer = 0
+
         if self.shop_overlay.is_open:
             return
         
@@ -261,6 +317,14 @@ class PlayState(BaseState):
         self.player.update(dt, self.obstacles, self.map.width, self.map.height)
         self.garden.update(dt)
         self.camera.update(self.player.rect)
+
+        if self.player.is_moving:
+            self.walk_sound_timer -= dt
+            if self.walk_sound_timer <= 0:
+                self.game.audio.play_sound("steps")
+                self.walk_sound_timer = self.walk_sound_interval
+        else:
+            self.walk_sound_timer = 0
 
     def draw(self, screen):
         screen.fill((0, 0, 0))
@@ -284,6 +348,20 @@ class PlayState(BaseState):
         self.map.draw_layer_group(screen, self.camera, self.foreground_layers)
 
         screen.blit(self.action_panel, self.action_panel_rect)
+        screen.blit(self.money_panel, self.money_panel_rect)
+
+        money_surface = self.font.render(str(self.money), False, (20, 20, 20))
+
+        coin_rect = self.coin_img.get_rect(
+            midleft=(self.money_panel_rect.x + 12, self.money_panel_rect.centery)
+        )
+
+        money_rect = money_surface.get_rect(
+            midleft=(coin_rect.right + 6, coin_rect.centery)
+        )
+
+        screen.blit(self.coin_img, coin_rect)
+        screen.blit(money_surface, money_rect)
         
         for i in range(self.slot_count):
             slot = self.inventory.get_slot(i)
@@ -319,8 +397,15 @@ class PlayState(BaseState):
                     screen.blit(shadow_surface, shadow_rect)
                     screen.blit(amount_surface, amount_rect)
 
-        money_text = self.font.render(f"Dinheiro: ${self.money}", True, (20, 20, 20))
-        screen.blit(money_text, (20, 50))
+        if self.feedback_message:
+            feedback_surface = self.font.render(self.feedback_message, False, (20, 20, 20))
+            feedback_rect = feedback_surface.get_rect(center=(SCREEN_WIDTH // 2, 40))
+
+            shadow_surface = self.font.render(self.feedback_message, False, (255, 255, 255))
+            shadow_rect = shadow_surface.get_rect(center=(feedback_rect.centerx + 2, feedback_rect.centery + 2))
+
+            screen.blit(shadow_surface, shadow_rect)
+            screen.blit(feedback_surface, feedback_rect)
 
         self.shop_overlay.draw(screen, self.money)
         self.pause_menu.draw(screen)

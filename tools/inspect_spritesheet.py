@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 pygame.init()
 
-IMAGE_PATH = "assets/ui/Settings.png"
+IMAGE_PATH = "assets/ui/Action_panel.png"
 WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 800
 BG_COLOR = (30, 30, 30)

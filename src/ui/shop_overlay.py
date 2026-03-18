@@ -5,10 +5,11 @@ from src.data.crops import CROPS
 
 
 class ShopOverlay:
-    def __init__(self, inventory, font, title_font=None):
+    def __init__(self, inventory, font, title_font=None, audio=None):
         self.inventory = inventory
         self.font = font
         self.title_font = title_font or font
+        self.audio = audio
 
         self.is_open = False
         self.active_panel = "buy"
@@ -43,7 +44,6 @@ class ShopOverlay:
         # ícones de sementes e plantas
         self.item_icons = self.load_item_icons()
 
-        # HELPERS DE LAYOUT 
         self.header_offset_y = 16
 
         self.grid_cols = 3
@@ -64,7 +64,6 @@ class ShopOverlay:
 
         self.help_text_y = 460
 
-    # Helpers de dados
     def open(self):
         self.is_open = True
         self.active_panel = "buy"
@@ -134,7 +133,6 @@ class ShopOverlay:
 
         return icons
 
-    # Navegação / lógica
     def move_grid_selection(self, current_index, key, total_items):
         cols = self.grid_cols
 
@@ -178,6 +176,9 @@ class ShopOverlay:
                 self.active_panel = "sell"
             else:
                 self.active_panel = "buy"
+
+            if self.audio:
+                self.audio.play_sound("menu_select")
             return money
 
         if self.active_panel == "buy":
@@ -187,6 +188,8 @@ class ShopOverlay:
                     event.key,
                     len(self.buy_items)
                 )
+                if self.audio:
+                    self.audio.play_sound("menu_select")
             elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
                 seed_name = self.buy_items[self.selected_buy_index]
                 price = self.buy_seed_prices[seed_name]
@@ -195,6 +198,8 @@ class ShopOverlay:
                     added = self.inventory.add_item(seed_name, 1)
                     if added:
                         money -= price
+                        if self.audio:
+                            self.audio.play_sound("money")
 
         elif self.active_panel == "sell":
             sell_items = self.get_sell_items()
@@ -206,6 +211,8 @@ class ShopOverlay:
                         event.key,
                         len(sell_items)
                     )   
+                    if self.audio:
+                        self.audio.play_sound("menu_select")
                 elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
                     crop_name = sell_items[self.selected_sell_index]
                     sell_price = self.get_sell_price(crop_name)
@@ -213,6 +220,8 @@ class ShopOverlay:
                     amount = self.inventory.remove_all(crop_name)
                     if amount > 0:
                         money += amount * sell_price
+                        if self.audio:
+                            self.audio.play_sound("money")
 
                     sell_items = self.get_sell_items()
                     if sell_items:

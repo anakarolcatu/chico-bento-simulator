@@ -7,12 +7,12 @@ class Player:
         self.y = y
 
         self.speed = 220
-        self.scale = 2
+        self.scale = 2.5
 
-        self.frame_width = 64
-        self.frame_height = 64
+        self.frame_width = 32
+        self.frame_height = 32
 
-        self.sheet = pygame.image.load("assets/player/Unarmed_Walk_with_shadow.png").convert_alpha()
+        self.sheet = pygame.image.load("assets/player/Citizen1_Walk.png").convert_alpha()
 
         self.animations = self.load_animations()
 
@@ -24,8 +24,10 @@ class Player:
         self.image = self.animations[self.direction][self.current_frame]
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
-        self.hitbox = pygame.Rect(0, 0, 24, 18)
-        self.hitbox.center = (self.x, self.y + 18)
+        self.hitbox = pygame.Rect(0, 0, 20, 14)
+        self.hitbox.center = (self.x, self.y + 12)
+
+        self.is_moving = False
 
     def load_animations(self):
         animations = {
@@ -83,7 +85,7 @@ class Player:
             self.hitbox.bottom = world_height
 
         self.x = self.hitbox.centerx
-        self.y = self.hitbox.centery - 18
+        self.y = self.hitbox.centery - 12
         self.rect.center = (round(self.x), round(self.y))
 
     def update(self, dt, obstacles, world_width, world_height):
@@ -130,6 +132,7 @@ class Player:
             self.current_frame = 0
 
         self.image = self.animations[self.direction][self.current_frame]
+        self.is_moving = moving
 
     def draw(self, screen, camera):
         screen.blit(self.image, camera.apply(self.rect))

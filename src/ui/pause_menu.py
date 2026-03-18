@@ -5,7 +5,8 @@ from src.ui.buttons import Button
 
 
 class PauseMenu:
-    def __init__(self, font, title_font=None):
+    def __init__(self, game, font, title_font=None):
+        self.game = game
         self.font = font
         self.title_font = title_font or font
 
@@ -63,17 +64,20 @@ class PauseMenu:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.close()
-                return None
+                return "CLOSE"
 
             elif event.key == pygame.K_UP:
                 self.selected = (self.selected - 1) % len(self.options)
                 self.update_selection()
+                self.game.audio.play_sound("menu_select")
 
             elif event.key == pygame.K_DOWN:
                 self.selected = (self.selected + 1) % len(self.options)
                 self.update_selection()
+                self.game.audio.play_sound("menu_select")
 
             elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                self.game.audio.play_sound("pause_menu")
                 return self.options[self.selected]
 
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -81,6 +85,7 @@ class PauseMenu:
                 if button.rect.collidepoint(event.pos):
                     self.selected = i
                     self.update_selection()
+                    self.game.audio.play_sound("pause_menu")
                     return self.options[self.selected]
 
         return None
